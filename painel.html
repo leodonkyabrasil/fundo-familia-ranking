@@ -18,9 +18,8 @@
     }
     *{
       box-sizing:border-box;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial;
     }
-    html,body{ height:100%; }
     body{
       margin:0; background:var(--bg); color:var(--text);
       letter-spacing:.2px;
@@ -35,58 +34,81 @@
     .muted{ color:#7ee2b8; opacity:.7; font-size:12px; margin-top:4px; }
     .badge{
       display:inline-flex; gap:6px; align-items:center; padding:6px 10px; font-size:11px;
-      border:1px solid #113a19; background:#031306; color:#8bf7a1; border-radius:999px;
-      box-shadow:0 0 14px inset rgba(57,255,20,.06);
-      white-space:nowrap;
+      border:1px solid #113a19; background:#031306;
+      border-radius:999px; color:var(--text-dim); box-shadow:0 0 10px rgba(0,0,0,.85);
     }
+    .badge-dot{
+      width:8px; height:8px; border-radius:999px; background:#22c55e; box-shadow:0 0 8px #22c55e;
+    }
+    .controls{ display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+    .select{
+      background:#020712; border-radius:999px; border:1px solid #172554;
+      padding:5px 12px; font-size:12px; color:var(--text-dim); display:flex; align-items:center; gap:6px;
+    }
+    select{
+      background:transparent; border:none; outline:none; color:var(--text); font-size:12px;
+    }
+    button{
+      cursor:pointer;
+      border-radius:999px;
+      border:1px solid #166534;
+      background:radial-gradient(circle at top, #16a34a 0, #052e16 45%, #000 100%);
+      padding:6px 14px; font-size:12px; color:#bbf7d0;
+      box-shadow:0 0 16px rgba(22,163,74,.5);
+    }
+    button:hover{ filter:brightness(1.1); }
     .ticker{
-      width:100%; overflow:hidden; border:1px solid #0d2811; background:#031306; border-radius:12px;
-      box-shadow:0 0 24px inset var(--neon-soft);
-      padding:8px 0; margin-top:8px;
+      margin-top:10px; border-radius:999px; border:1px solid #064e3b;
+      background:radial-gradient(circle at left, rgba(34,197,94,.22), rgba(0,0,0,0));
+      padding:5px 10px; overflow:hidden; position:relative;
     }
     .ticker-track{
-      display:flex; gap:28px; white-space:nowrap; will-change:transform;
-      animation: marquee 30s linear infinite;
+      display:inline-flex; gap:16px;
+      white-space:nowrap;
+      animation:ticker 28s linear infinite;
+      font-size:11px; color:#a7f3d0;
     }
-    @keyframes marquee{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
     .pill{
-      font-size:12px; padding:4px 10px; border:1px solid #194d1f;
-      border-radius:999px; background:#041409; color:var(--text);
+      padding:2px 10px; border-radius:999px; border:1px solid #0f766e;
+      background:rgba(15,118,110,.15); font-size:11px;
     }
-    .card{
-      background:var(--card); border:1px solid #0f172a; border-radius:14px;
-      box-shadow:0 0 0 1px #0b0b0b, 0 14px 34px rgba(0,0,0,.55);
-      padding:14px;
+    @keyframes ticker{
+      0%{ transform:translateX(0); }
+      100%{ transform:translateX(-50%); }
     }
-    .controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:flex-end; }
-    select, input[type="number"]{
-      background:#010a03; color:var(--text); border:1px solid #0d2811; border-radius:10px;
-      padding:8px 10px; font-size:12px; outline:none;
-      box-shadow:0 0 0 1px rgba(57,255,20,.08);
+
+    table{ width:100%; border-collapse:collapse; margin-top:16px; font-size:13px; }
+    th,td{ padding:8px 6px; border-bottom:1px solid #113a19; }
+    thead tr{ background:radial-gradient(circle at top, rgba(15,118,110,.2), rgba(0,0,0,0)); }
+    th{
+      text-transform:uppercase; font-size:11px; color:var(--text-dim); letter-spacing:.05em;
+      text-align:right;
     }
-    .btn{
-      background:#031306; color:var(--neon); border:1px solid #173a1e; border-radius:999px; padding:8px 12px; font-size:12px;
-      cursor:pointer; transition:transform .15s ease, box-shadow .2s ease, opacity .2s ease;
-      box-shadow:0 0 14px var(--neon-soft), inset 0 0 14px rgba(57,255,20,.06);
+    th:first-child, td:first-child{ text-align:center; }
+    th:nth-child(2), td:nth-child(2){ text-align:left; }
+    tr:hover td{ background:rgba(57,255,20,0.02); }
+    .rank{ color:var(--neon); font-weight:600; }
+    .pos{ font-size:11px; opacity:.75; }
+    .right{text-align:right;}
+    .center{text-align:center;}
+    .pos-up{ color:#22c55e; }
+    .pos-down{ color:#f97316; }
+    .text-bad{ color:var(--danger); }
+    .footer{ font-size:11px; color:#7ee2b8; margin-top:8px; opacity:.7; }
+    .chip{
+      display:inline-flex; align-items:center; gap:4px; padding:2px 7px;
+      border-radius:999px; font-size:11px;
     }
-    .btn:hover{ transform:translateY(-1px); opacity:.95; }
-    .right{ text-align:right; }
-    .center{ text-align:center; }
-    table{ width:100%; border-collapse:collapse; }
-    th, td{ padding:10px 8px; border-bottom:1px dashed #113a19; font-size:13px; }
-    th{ text-transform:uppercase; font-size:11px; letter-spacing:.08em; color:var(--text-dim); }
-    tr:hover td{ background:rgba(57,255,20,0.03); }
-    .rank{ color:var(--neon); font-weight:600; text-shadow:0 0 10px var(--neon-soft); }
-    .addr{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      letter-spacing:.2px;
+    .chip-pos{ color:#bbf7d0; border:1px solid #166534; background:rgba(22,101,52,.2); }
+    .chip-neg{ color:#fecaca; border:1px solid #b91c1c; background:rgba(127,29,29,.18); }
+    .small{ font-size:11px; opacity:.8; }
+
+    @media (max-width:900px){
+      .header{ flex-direction:column; align-items:flex-start; }
+      .controls{ align-items:flex-start; }
+      table{ font-size:12px; }
+      th,td{ padding:6px 4px; }
     }
-    .value{ font-variant-numeric: tabular-nums; }
-    .pct{ font-variant-numeric: tabular-nums; }
-    .pct.up{ color:var(--neon); }
-    .pct.down{ color:var(--danger); }
-    .share{ font-variant-numeric: tabular-nums; color:var(--text-dim); }
-    .footer{ color:#7ee2b8; opacity:.7; font-size:12px; padding:8px 4px; }
   </style>
 </head>
 <body>
@@ -100,95 +122,100 @@
         </div>
       </div>
       <div class="controls">
-        <span class="badge">🟢 Online</span>
-        <span class="badge" id="lastUpdate">--</span>
-        <select id="sortBy" aria-label="Ordenar por">
-          <option value="saldoBRL">Saldo (BRL)</option>
-          <option value="saldoBTC">Saldo (BTC)</option>
-          <option value="p24h">24h (%)</option>
-          <option value="p7d">7d (%)</option>
-          <option value="p30d">30d (%)</option>
-          <option value="p12m">12M (%)</option>
-        </select>
-        <button class="btn" id="refreshBtn">Atualizar agora</button>
+        <span class="badge">
+          <span class="badge-dot"></span>
+          Online
+        </span>
+        <span class="badge" id="lastUpdate">Atualizando...</span>
+        <div class="select">
+          Ordenar:
+          <select id="sortBy">
+            <option value="saldoBRL">Saldo (BRL)</option>
+            <option value="saldoBTC">Saldo (BTC)</option>
+            <option value="pct24h">24h (%)</option>
+            <option value="pct7d">7d (%)</option>
+            <option value="pct30d">30d (%)</option>
+            <option value="pct12m">12m (%)</option>
+          </select>
+        </div>
+        <button id="refreshBtn">🔄 Atualizar agora</button>
       </div>
     </div>
 
-    <div class="card" id="board">
-      <table>
-        <thead>
-          <tr>
-            <th class="center">#</th>
-            <th>Carteira</th>
-            <th class="right">Saldo (BRL)</th>
-            <th class="right">Saldo (BTC)</th>
-            <th class="right">% do Fundo</th>
-            <th class="right">24h (%)</th>
-            <th class="right">24h (R$)</th>
-            <th class="right">7d (%)</th>
-            <th class="right">7d (R$)</th>
-            <th class="right">30d (%)</th>
-            <th class="right">30d (R$)</th>
-            <th class="right">12M (%)</th>
-            <th class="right">12M (R$)</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <div class="footer">
-        Taxa de atualização: <span id="freq">5s</span> • Fonte: /fund/state e /fund/summary • % do fundo com base no valor total em BRL.
-      </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Carteira</th>
+          <th>Saldo (BRL)</th>
+          <th>Saldo (BTC)</th>
+          <th>% do Fundo</th>
+          <th>24H</th>
+          <th>24H (R$)</th>
+          <th>7D</th>
+          <th>7D (R$)</th>
+          <th>30D</th>
+          <th>30D (R$)</th>
+          <th>12M</th>
+          <th>12M (R$)</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <div class="footer">
+      Taxa de atualização: 5s • Fonte: /fund/state e /fund/summary • % do fundo com base no valor total em BRL.
     </div>
   </div>
 
 <script>
 (function(){
-  const BACKEND = 'https://orleans-packard-acknowledged-shopper.trycloudflare.com';
+  // AQUI é o endereço que o GitHub vai chamar:
+  const BACKEND = 'https://conscious-plaintiff-sales-guns.trycloudflare.com';
+
   const POLL_MS = 5000;
-  let priceBRLperBTC = 350000;
-  let state = { wallets: [] };
+
+  let state = {
+    wallets: [],
+    sortBy: 'saldoBRL'
+  };
+
+  let priceBRLperBTC = 0;
   let fundTotalBRL = 0;
 
-  function fmtBRL(n){ 
-    if (!isFinite(n)) n = 0;
-    return n.toLocaleString('pt-BR',{ style:'currency', currency:'BRL', maximumFractionDigits: 2 });
+  function fmtBRL(v){
+    if (!isFinite(v)) v = 0;
+    return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2});
   }
-  function fmtBTC(n){
-    if (!isFinite(n)) n = 0;
-    return n.toLocaleString('en-US',{ minimumFractionDigits: 6, maximumFractionDigits: 6 });
+  function fmtBTC(v){
+    if (!isFinite(v)) v = 0;
+    return v.toFixed(6);
   }
-  function fmtPct(n){
-    if (!isFinite(n)) n = 0;
-    const s = (n>=0?'+':'') + n.toFixed(2) + '%';
-    const cls = n>=0 ? 'pct up' : 'pct down';
-    return `<span class="${cls}">${s}</span>`;
+  function fmtPct(v){
+    if (!isFinite(v)) v = 0;
+    const sign = v>0?'+':'';
+    return sign+v.toFixed(2)+'%';
   }
-  function fmtShare(n){
-    if (!isFinite(n)) n = 0;
-    return `<span class="share">${n.toFixed(2)}%</span>`;
-  }
-  function shortAddr(addr){
-    if(!addr) return '-';
-    const a = String(addr);
-    if (a.length <= 14) return a;
-    return a.slice(0,6) + '…' + a.slice(-6);
+  function shortAddr(a){
+    const s = String(a||'');
+    if (s.length<=10) return s;
+    return s.slice(0,6)+'…'+s.slice(-6);
   }
 
   async function fetchSummary(){
     try{
       const r = await fetch(`${BACKEND}/fund/summary`);
       const j = await r.json();
-      if (j && j.rates && j.rates.btcusdt && j.rates.usdtbrl){
-        priceBRLperBTC = j.rates.btcusdt * j.rates.usdtbrl;
+      if (!j || !j.ok){
+        return;
       }
-      if (j && j.conversions && typeof j.conversions.BRL === 'number'){
-        fundTotalBRL = j.conversions.BRL;
-      }
-      return j;
-    }catch(e){ return null; }
+      priceBRLperBTC = Number(j.rates?.btcusdt || 0) * Number(j.rates?.usdtbrl || 0);
+      fundTotalBRL = Number(j.fundTotalBRL || j.totalBRL || 0);
+    }catch(e){
+      console.error('Erro ao buscar /fund/summary', e);
+    }
   }
 
-  // Lê participantes do Money Tree
   async function fetchWallets(){
     try{
       const r = await fetch(`${BACKEND}/fund/state`);
@@ -234,93 +261,71 @@
     if (w.length){
       const top = [...w].sort((a,b)=> (b.saldoBRL||0)-(a.saldoBRL||0)).slice(0,3);
       top.forEach((it,idx)=>{
-        items.push(`<span class="pill">#${idx+1} ${shortAddr(it.address)} • ${fmtBRL(it.saldoBRL||0)}</span>`);
+        items.push(`<span class="pill">Top ${idx+1}: ${shortAddr(it.address)} — ${fmtBRL(it.saldoBRL||0)}</span>`);
       });
     }
-    el.innerHTML = items.concat(items).join("");
+    el.innerHTML = items.concat(items).join(' • ');
   }
 
   function render(){
-    const tbody = document.getElementById('rows');
-    const sortBy = document.getElementById('sortBy').value;
-    const rows = [];
+    const tbody = document.getElementById('tbody');
+    const sortBy = state.sortBy || 'saldoBRL';
+    const wallets = state.wallets || [];
 
-    const wallets = (state.wallets||[]).map(w => {
-      const saldoBRL = Number(w.saldoBRL||0);
-      const saldoBTC = ensureBTC(w);
-      const p24h = Number(w.pct24h||w.p24h||0);
-      const p7d  = Number(w.pct7d ||w.p7d ||0);
-      const p30d = Number(w.pct30d||w.p30d||0);
-      const p12m = Number(w.pct12m||w.p12m||0);
+    const ranked = [...wallets].map(w => ({
+      ...w,
+      saldoBTC: ensureBTC(w),
+      share: fundTotalBRL>0 ? (w.saldoBRL||0)/fundTotalBRL*100 : 0
+    }));
 
-      // lucros em reais
-      const l24h = saldoBRL * (p24h/100);
-      const l7d  = saldoBRL * (p7d /100);
-      const l30d = saldoBRL * (p30d/100);
-      const l12m = saldoBRL * (p12m/100);
-
-      return {
-        address: w.address,
-        saldoBRL,
-        saldoBTC,
-        p24h, p7d, p30d, p12m,
-        l24h, l7d, l30d, l12m
-      };
+    ranked.sort((a,b)=>{
+      const av = a[sortBy] || 0;
+      const bv = b[sortBy] || 0;
+      return bv-av;
     });
 
-    wallets.sort((a,b)=>{
-      if (sortBy === 'saldoBRL') return b.saldoBRL - a.saldoBRL;
-      if (sortBy === 'saldoBTC') return b.saldoBTC - a.saldoBTC;
-      if (sortBy === 'p24h') return b.p24h - a.p24h;
-      if (sortBy === 'p7d') return b.p7d - a.p7d;
-      if (sortBy === 'p30d') return b.p30d - a.p30d;
-      if (sortBy === 'p12m') return b.p12m - a.p12m;
-      return b.saldoBRL - a.saldoBRL;
+    tbody.innerHTML = '';
+
+    ranked.forEach((w,idx)=>{
+      const saldo24h = (w.saldoBRL||0) * (w.pct24h||0) / 100;
+      const saldo7d  = (w.saldoBRL||0) * (w.pct7d ||0) / 100;
+      const saldo30d = (w.saldoBRL||0) * (w.pct30d||0) / 100;
+      const saldo12m = (w.saldoBRL||0) * (w.pct12m||0) / 100;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="rank">${idx+1}</td>
+        <td>${shortAddr(w.address)}</td>
+        <td class="right">${fmtBRL(w.saldoBRL||0)}</td>
+        <td class="right">${fmtBTC(w.saldoBTC||0)} BTC</td>
+        <td class="right small">${fmtPct(w.share||0)}</td>
+        <td class="right ${w.pct24h>=0 ? 'pos-up' : 'text-bad'}">${fmtPct(w.pct24h||0)}</td>
+        <td class="right small ${saldo24h>=0 ? 'pos-up' : 'text-bad'}">${fmtBRL(saldo24h)}</td>
+        <td class="right ${w.pct7d>=0 ? 'pos-up' : 'text-bad'}">${fmtPct(w.pct7d||0)}</td>
+        <td class="right small ${saldo7d>=0 ? 'pos-up' : 'text-bad'}">${fmtBRL(saldo7d)}</td>
+        <td class="right ${w.pct30d>=0 ? 'pos-up' : 'text-bad'}">${fmtPct(w.pct30d||0)}</td>
+        <td class="right small ${saldo30d>=0 ? 'pos-up' : 'text-bad'}">${fmtBRL(saldo30d)}</td>
+        <td class="right ${w.pct12m>=0 ? 'pos-up' : 'text-bad'}">${fmtPct(w.pct12m||0)}</td>
+        <td class="right small ${saldo12m>=0 ? 'pos-up' : 'text-bad'}">${fmtBRL(saldo12m)}</td>
+      `;
+      tbody.appendChild(tr);
     });
 
-    const total = fundTotalBRL || wallets.reduce((s,w)=>s+w.saldoBRL,0);
-
-    wallets.forEach((w, idx)=>{
-      const share = total > 0 ? (w.saldoBRL / total * 100) : 0;
-      rows.push(`
-        <tr>
-          <td class="center rank">${idx+1}</td>
-          <td class="addr">${shortAddr(w.address)}</td>
-          <td class="right value">${fmtBRL(w.saldoBRL)}</td>
-          <td class="right value">${fmtBTC(w.saldoBTC)} BTC</td>
-          <td class="right">${fmtShare(share)}</td>
-          <td class="right">${fmtPct(w.p24h)}</td>
-          <td class="right value">${fmtBRL(w.l24h)}</td>
-          <td class="right">${fmtPct(w.p7d)}</td>
-          <td class="right value">${fmtBRL(w.l7d)}</td>
-          <td class="right">${fmtPct(w.p30d)}</td>
-          <td class="right value">${fmtBRL(w.l30d)}</td>
-          <td class="right">${fmtPct(w.p12m)}</td>
-          <td class="right value">${fmtBRL(w.l12m)}</td>
-        </tr>
-      `);
-    });
-
-    tbody.innerHTML = rows.join("");
+    document.getElementById('lastUpdate').textContent = 'Atualizado: ' + new Date().toLocaleString('pt-BR');
+    renderTicker();
   }
 
   async function tick(){
-    const [sum, wallets] = await Promise.all([fetchSummary(), fetchWallets()]);
-    if (!fundTotalBRL && wallets && Array.isArray(wallets.wallets)) {
-      fundTotalBRL = wallets.wallets.reduce((s,w)=>s+Number(w.saldoBRL||0),0);
-    }
-    if (wallets && Array.isArray(wallets.wallets)){
-      state.wallets = wallets.wallets;
-      render();
-      renderTicker();
-      document.getElementById('lastUpdate').textContent = 'Atualizado: ' + new Date().toLocaleString('pt-BR');
-    }
+    state.sortBy = document.getElementById('sortBy').value || 'saldoBRL';
+    await fetchSummary();
+    const { wallets } = await fetchWallets();
+    state.wallets = wallets;
+    render();
   }
 
   document.getElementById('refreshBtn').addEventListener('click', tick);
   document.getElementById('sortBy').addEventListener('change', render);
 
-  // Primeira carga + polling
   tick();
   setInterval(tick, POLL_MS);
 })();
