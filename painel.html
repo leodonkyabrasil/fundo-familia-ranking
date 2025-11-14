@@ -141,7 +141,7 @@
       margin-bottom:10px;
     }
     .ticker-inner{
-      display:flex;
+      display:inline-flex;
       align-items:center;
       gap:16px;
       white-space:nowrap;
@@ -169,6 +169,7 @@
       font-size:7px;
       color:#4ade80;
       text-shadow:0 0 12px rgba(34,197,94,0.9);
+      margin-right:3px;
     }
     table{
       width:100%;
@@ -306,7 +307,18 @@
 
     <div class="ticker">
       <div class="ticker-inner" id="tickerTrack">
-        <!-- preenchido via JS -->
+        <!-- Grupo A -->
+        <span class="pill" id="pillFundoA"></span>
+        <span class="pill" id="pillDistA"></span>
+        <span class="pill" id="pillTop1A"></span>
+        <span class="pill" id="pillTop2A"></span>
+        <span class="pill" id="pillTop3A"></span>
+        <!-- Grupo B (cópia pra loop infinito) -->
+        <span class="pill" id="pillFundoB"></span>
+        <span class="pill" id="pillDistB"></span>
+        <span class="pill" id="pillTop1B"></span>
+        <span class="pill" id="pillTop2B"></span>
+        <span class="pill" id="pillTop3B"></span>
       </div>
     </div>
 
@@ -341,9 +353,7 @@
 
 <script>
 (function(){
-  // AQUI é o endereço que o GitHub vai chamar:
   const BACKEND = 'https://conscious-plaintiff-sales-guns.trycloudflare.com';
-
   const POLL_MS = 5000;
 
   let state = {
@@ -431,23 +441,32 @@
     return (wallets || []).reduce((acc, w) => acc + (Number(w.saldoBRL) || 0), 0);
   }
 
+  function setText(id, text){
+    const el = document.getElementById(id);
+    if (el) el.textContent = text || '';
+  }
+
   function renderTicker(){
-    const el = document.getElementById('tickerTrack');
-    const w = state.wallets || [];
-    const items = [];
-    if (isFinite(fundTotalBRL)){
-      items.push(`<span class="pill">Fundo ≈ ${fmtBRL(fundTotalBRL)}</span>`);
-    }
-    if (isFinite(distributableBRL) && distributableBRL > 0){
-      items.push(`<span class="pill">50% distribuível ≈ ${fmtBRL(distributableBRL)}</span>`);
-    }
-    if (w.length){
-      const top = [...w].sort((a,b)=> (b.saldoBRL||0)-(a.saldoBRL||0)).slice(0,3);
-      top.forEach((it,idx)=>{
-        items.push(`<span class="pill">Top ${idx+1}: ${shortAddr(it.address)} — ${fmtBRL(it.saldoBRL||0)}</span>`);
-      });
-    }
-    el.innerHTML = items.concat(items).join(' • ');
+    const wallets = state.wallets || [];
+    const fundoText = fundTotalBRL > 0 ? `Fundo ≈ ${fmtBRL(fundTotalBRL)}` : '';
+    const distText  = distributableBRL > 0 ? `50% distribuível ≈ ${fmtBRL(distributableBRL)}` : '';
+
+    const top = [...wallets].sort((a,b)=> (b.saldoBRL||0)-(a.saldoBRL||0)).slice(0,3);
+    const topText = top.map((it,idx)=> `Top ${idx+1}: ${shortAddr(it.address)} — ${fmtBRL(it.saldoBRL||0)}`);
+
+    // Grupo A
+    setText('pillFundoA', fundoText);
+    setText('pillDistA',  distText);
+    setText('pillTop1A',  topText[0] || '');
+    setText('pillTop2A',  topText[1] || '');
+    setText('pillTop3A',  topText[2] || '');
+
+    // Grupo B (cópia pra manter o loop infinito suave)
+    setText('pillFundoB', fundoText);
+    setText('pillDistB',  distText);
+    setText('pillTop1B',  topText[0] || '');
+    setText('pillTop2B',  topText[1] || '');
+    setText('pillTop3B',  topText[2] || '');
   }
 
   function render(){
@@ -514,6 +533,8 @@
 
     document.getElementById('lastUpdate').textContent =
       'Atualizado: ' + new Date().toLocaleString('pt-BR');
+
+    // agora só atualiza os textos dos pills, sem recriar o elemento com animação
     renderTicker();
   }
 
