@@ -219,6 +219,44 @@
     .pos-up{ color:#4ade80; }
     .pos-down{ color:#fb923c; }
     .text-bad{ color:var(--danger); }
+    .small{
+      font-size:11px;
+      opacity:.8;
+    }
+
+    /* CARD DO GRÁFICO */
+    .chart-card{
+      margin-top:14px;
+      padding:10px 12px 12px;
+      border-radius:14px;
+      background:rgba(15,23,42,0.95);
+      border:1px solid rgba(30,64,175,0.85);
+      box-shadow:0 10px 30px rgba(15,23,42,0.9);
+    }
+    .chart-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:6px;
+      font-size:11px;
+      color:#9ca3af;
+    }
+    .chart-title{
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+      color:#cbd5f5;
+    }
+    .chart-meta{
+      font-size:11px;
+      color:#a5b4fc;
+    }
+    #btcChart{
+      width:100%;
+      height:160px;
+      display:block;
+    }
+
     .footer{
       font-size:11px;
       color:#9ca3af;
@@ -253,10 +291,7 @@
       border:1px solid #b91c1c;
       background:rgba(127,29,29,.2);
     }
-    .small{
-      font-size:11px;
-      opacity:.8;
-    }
+
     @media (max-width:900px){
       .header{
         flex-direction:column;
@@ -345,6 +380,15 @@
       <tbody id="tbody"></tbody>
     </table>
 
+    <!-- CARD DO GRÁFICO BTC -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">BTC EM TEMPO REAL</span>
+        <span class="chart-meta" id="chartLastPrice">BTC ≈ —</span>
+      </div>
+      <canvas id="btcChart" width="1000" height="160"></canvas>
+    </div>
+
     <div class="footer">
       <span>Taxa de atualização: 5s • Fonte: /fund/state e /fund/summary • % do fundo com base no valor total em BRL.</span>
       <span class="chip chip-pos"><span class="emoji">🌱</span> 50% do lucro é reinvestido no fundo, 50% é distribuível.</span>
@@ -368,6 +412,10 @@
   let grossProfitBRL = 0;
   let distributableBRL = 0;
   let totalContribBRL = 0;
+
+  // histórico de preços do BTC para o gráfico
+  const MAX_POINTS = 60; // ~5 min se atualizar a cada 5s
+  let priceHistory = [];
 
   function fmtBRL(v){
     if (!isFinite(v)) v = 0;
@@ -461,12 +509,108 @@
     setText('pillTop2A',  topText[1] || '');
     setText('pillTop3A',  topText[2] || '');
 
-    // Grupo B (cópia pra manter o loop infinito suave)
+    // Grupo B (cópia)
     setText('pillFundoB', fundoText);
     setText('pillDistB',  distText);
     setText('pillTop1B',  topText[0] || '');
     setText('pillTop2B',  topText[1] || '');
     setText('pillTop3B',  topText[2] || '');
+  }
+
+  // DESENHA GRÁFICO DO BTC
+  function renderChart(){
+    const canvas = document.getElementById('btcChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = 'rgba(15,23,42,1)';
+    ctx.fillRect(0,0,w,h);
+
+    const paddingLeft = 40;
+    const paddingRight = 8;
+    const paddingTop = 8;
+    const paddingBottom = 20;
+
+    if (priceHistory.length < 2){
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '11px system-ui';
+      ctx.fillText('Aguardando dados do BTC...', paddingLeft, h/2);
+      return;
+    }
+
+    const prices = priceHistory.map(p => p.price);
+    let minPrice = Math.min(...prices);
+    let maxPrice = Math.max(...prices);
+
+    if (minPrice === maxPrice){
+      minPrice *= 0.99;
+      maxPrice *= 1.01;
+    }
+
+    const span = maxPrice - minPrice;
+
+    // eixo X/Y
+    ctx.strokeStyle = 'rgba(148,163,184,0.8)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(paddingLeft, paddingTop);
+    ctx.lineTo(paddingLeft, h-paddingBottom);
+    ctx.lineTo(w-paddingRight, h-paddingBottom);
+    ctx.stroke();
+
+    // linhas horizontais (grid) + labels Y
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '10px system-ui';
+    const gridLines = 4;
+    for (let i=0;i<=gridLines;i++){
+      const y = paddingTop + (h-paddingTop-paddingBottom) * (i/gridLines);
+      ctx.strokeStyle = 'rgba(30,64,175,0.35)';
+      ctx.beginPath();
+      ctx.moveTo(paddingLeft, y);
+      ctx.lineTo(w-paddingRight, y);
+      ctx.stroke();
+
+      const value = maxPrice - span * (i/gridLines);
+      ctx.fillText(value.toFixed(0), 3, y+3);
+    }
+
+    // labels de tempo no eixo X
+    const n = priceHistory.length;
+    const ticks = 4;
+    for (let i=0;i<=ticks;i++){
+      const idx = Math.round((n-1)*i/ticks);
+      const point = priceHistory[idx];
+      if (!point) continue;
+      const x = paddingLeft + (w-paddingLeft-paddingRight) * (idx/(n-1));
+      const t = point.t;
+      const label = t.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      ctx.fillText(label, x-16, h-4);
+    }
+
+    // linha de preço
+    ctx.beginPath();
+    for (let i=0;i<n;i++){
+      const p = priceHistory[i];
+      const x = paddingLeft + (w-paddingLeft-paddingRight) * (i/(n-1));
+      const y = paddingTop + (h-paddingTop-paddingBottom) * (1 - (p.price - minPrice) / span);
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // ponto final
+    const last = priceHistory[n-1];
+    const lx = paddingLeft + (w-paddingLeft-paddingRight);
+    const ly = paddingTop + (h-paddingTop-paddingBottom) * (1 - (last.price - minPrice) / span);
+    ctx.fillStyle = '#4ade80';
+    ctx.beginPath();
+    ctx.arc(lx, ly, 3, 0, Math.PI*2);
+    ctx.fill();
   }
 
   function render(){
@@ -534,21 +678,45 @@
     document.getElementById('lastUpdate').textContent =
       'Atualizado: ' + new Date().toLocaleString('pt-BR');
 
-    // agora só atualiza os textos dos pills, sem recriar o elemento com animação
+    // atualiza texto com preço atual do BTC
+    const chartMeta = document.getElementById('chartLastPrice');
+    if (chartMeta){
+      chartMeta.textContent = priceBRLperBTC > 0
+        ? `BTC ≈ ${fmtBRL(priceBRLperBTC)}`
+        : 'BTC ≈ —';
+    }
+
+    // ticker e gráfico
     renderTicker();
+    renderChart();
   }
 
   async function tick(){
     state.sortBy = document.getElementById('sortBy').value || 'saldoBRL';
+
+    // 1) resumo do fundo (inclui preço do BTC)
     await fetchSummary();
+
+    // guarda no histórico do BTC para o gráfico
+    if (priceBRLperBTC > 0){
+      priceHistory.push({ t: new Date(), price: priceBRLperBTC });
+      if (priceHistory.length > MAX_POINTS){
+        priceHistory.shift(); // tira o mais antigo
+      }
+    }
+
+    // 2) carteiras
     const { wallets } = await fetchWallets();
     state.wallets = wallets;
+
+    // 3) renderiza tudo
     render();
   }
 
   document.getElementById('refreshBtn').addEventListener('click', tick);
   document.getElementById('sortBy').addEventListener('change', render);
 
+  // inicializa
   tick();
   setInterval(tick, POLL_MS);
 })();
