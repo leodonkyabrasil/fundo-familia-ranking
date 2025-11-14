@@ -436,13 +436,33 @@
     return s.slice(0,6)+'…'+s.slice(-6);
   }
 
+  // LÊ /fund/summary DO TEU SERVIDOR (que já chama a Binance)
   async function fetchSummary(){
     try{
       const r = await fetch(`${BACKEND}/fund/summary`);
       const j = await r.json();
-      if (j && j.ok){
-        priceBRLperBTC = Number(j.priceBRLperBTC || j.price || j.btcPriceBRL || 0);
-        fundTotalBRL   = Number(j.totalBRL || j.total || 0);
+      if (!j || !j.ok) return;
+
+      // total em BRL (já vem pronto)
+      fundTotalBRL =
+        Number(j.totalBRL ?? (j.conversions && j.conversions.BRL) ?? 0);
+
+      // taxas da Binance que o server já buscou
+      const rates = j.rates || {};
+      const conv  = j.conversions || {};
+
+      const usdtbrl = Number(rates.usdtbrl || 0);
+      const btcusdt = Number(rates.btcusdt || 0);
+
+      // 1) preferimos usar as taxas diretas
+      if (usdtbrl > 0 && btcusdt > 0){
+        priceBRLperBTC = btcusdt * usdtbrl;
+      }
+      // 2) fallback: usa conversões BTC/BRL do resumo
+      else if (conv.BTC > 0 && conv.BRL > 0){
+        priceBRLperBTC = conv.BRL / conv.BTC;
+      } else {
+        priceBRLperBTC = 0;
       }
     } catch(e){
       console.error('Erro ao buscar /fund/summary', e);
@@ -694,7 +714,7 @@
   async function tick(){
     state.sortBy = document.getElementById('sortBy').value || 'saldoBRL';
 
-    // 1) resumo do fundo (inclui preço do BTC)
+    // 1) resumo do fundo (inclui preço do BTC via Binance)
     await fetchSummary();
 
     // guarda no histórico do BTC para o gráfico
