@@ -4,742 +4,222 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ranking de Carteiras — Fundo da Família</title>
+
   <style>
     :root{
-      --bg:#000000;
-      --card:#0a0a0a;
-      --grid:#0f0f0f;
-      --text:#c7f9cc;
-      --text-dim:#6ee7b7;
-      --neon:#39ff14;
-      --neon-soft: rgba(57,255,20,0.15);
-      --danger:#ff6b6b;
-      --muted:#4b5563;
-      --border:#1f2933;
+      --bg:#000000; --card:#0a0a0a; --grid:#0f0f0f;
+      --text:#c7f9cc; --text-dim:#6ee7b7; --neon:#39ff14;
+      --neon-soft: rgba(57,255,20,0.15); --danger:#ff6b6b; --muted:#2a2a2a;
     }
-    *{
-      box-sizing:border-box;
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-    }
-    body{
-      margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(circle at top left,rgba(57,255,20,0.08),transparent 55%),
-        radial-gradient(circle at bottom right,rgba(34,197,94,0.07),transparent 55%),
-        #020617;
-      color:var(--text);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px 12px;
-    }
-    .container{
-      width:100%;
-      max-width:1120px;
-      background:rgba(15,23,42,0.96);
-      border-radius:20px;
-      padding:20px 20px 16px;
-      border:1px solid rgba(148,163,184,0.35);
-      box-shadow:
-        0 22px 70px rgba(0,0,0,0.75),
-        0 0 0 1px rgba(15,23,42,0.7);
-      backdrop-filter:blur(16px);
-    }
-    .header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:10px;
-    }
-    h1{
-      margin:0 0 4px;
-      font-size:20px;
-      letter-spacing:0.02em;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    h1 span.logo{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:26px;
-      height:26px;
-      border-radius:999px;
-      background:radial-gradient(circle at 30% 0%,#bbf7d0,#4ade80);
-      box-shadow:0 0 0 2px rgba(22,163,74,0.3),0 0 25px rgba(34,197,94,0.7);
-      color:#052e16;
-      font-size:14px;
-      font-weight:800;
-    }
-    .subtitle{
-      margin:0;
-      font-size:12px;
-      color:var(--text-dim);
-    }
-    .controls{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:6px;
-      font-size:12px;
-    }
-    .controls-top{
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    label{
-      color:var(--text-dim);
-      font-size:11px;
-    }
-    select{
-      background:#020617;
-      border:1px solid rgba(148,163,184,0.6);
-      color:var(--text);
-      border-radius:999px;
-      padding:4px 8px;
-      font-size:11px;
-      outline:none;
-      cursor:pointer;
-    }
-    button{
-      background:linear-gradient(135deg,#22c55e,#16a34a);
-      border:none;
-      color:#ecfdf3;
-      font-size:11px;
-      padding:6px 10px;
-      border-radius:999px;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      box-shadow:0 0 0 1px rgba(34,197,94,0.5),0 10px 22px rgba(22,163,74,0.4);
-      font-weight:500;
-    }
-    button:hover{
-      filter:brightness(1.05);
-      transform:translateY(-0.5px);
-    }
-    button:active{
-      transform:translateY(0.5px);
-      box-shadow:0 8px 16px rgba(22,163,74,0.35);
-    }
-    .update-info{
-      font-size:11px;
-      color:#9ca3af;
-    }
-    .ticker{
-      position:relative;
-      overflow:hidden;
-      border-radius:999px;
-      border:1px solid rgba(148,163,184,0.55);
-      background:radial-gradient(circle at 20% 0%,rgba(52,211,153,0.18),transparent 60%),rgba(15,23,42,0.98);
-      padding:6px 0;
-      margin-bottom:10px;
-    }
-    .ticker-inner{
-      display:inline-flex;
-      align-items:center;
-      gap:16px;
-      white-space:nowrap;
-      animation:marquee 26s linear infinite;
-      padding-left:10px;
-    }
-    @keyframes marquee{
-      0%{ transform:translateX(0); }
-      100%{ transform:translateX(-50%); }
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:5px;
-      padding:3px 9px;
-      border-radius:999px;
-      background:rgba(15,23,42,0.9);
-      border:1px solid rgba(52,211,153,0.55);
-      font-size:11px;
-      color:#bbf7d0;
-      box-shadow:0 0 0 1px rgba(15,23,42,0.85);
-    }
-    .pill::before{
-      content:'⬤';
-      font-size:7px;
-      color:#4ade80;
-      text-shadow:0 0 12px rgba(34,197,94,0.9);
-      margin-right:3px;
-    }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:6px;
-      background:rgba(15,23,42,0.9);
-      border-radius:14px;
-      overflow:hidden;
-      border:1px solid rgba(30,64,175,0.7);
-      box-shadow:
-        0 14px 40px rgba(15,23,42,0.9),
-        0 0 0 1px rgba(15,23,42,0.96);
-    }
-    thead{
-      background:linear-gradient(135deg,rgba(15,23,42,0.7),rgba(17,24,39,0.88));
-      border-bottom:1px solid rgba(30,64,175,0.9);
-    }
-    th,td{
-      padding:8px 8px;
-      font-size:12px;
-      text-align:right;
-      border-bottom:1px solid rgba(30,64,175,0.35);
-    }
-    th{
-      font-weight:600;
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:0.06em;
-      color:#9ca3af;
-      background:radial-gradient(circle at top,rgba(30,64,175,0.35),transparent 60%);
-    }
-    tbody tr:last-child td{
-      border-bottom:none;
-    }
-    th:nth-child(1),td:nth-child(1){ text-align:center; width:32px; }
-    th:nth-child(2),td:nth-child(2){ text-align:left; }
-    tr:hover td{
-      background:rgba(30,64,175,0.24);
-    }
-    .rank{
-      color:#60a5fa;
-      font-weight:600;
-      text-shadow:0 0 12px rgba(37,99,235,0.75);
-    }
+    *{box-sizing:border-box; font-family:system-ui,Segoe UI,Roboto,Arial;}
+    body{margin:0;background:var(--bg);color:var(--text);}
+    .container{max-width:1200px;margin:auto;padding:20px;}
+    h1{color:var(--neon);text-shadow:0 0 12px var(--neon-soft);}
+    .muted{color:var(--text-dim);font-size:13px;margin-bottom:10px;}
+    table{width:100%;border-collapse:collapse;margin-top:10px;}
+    th,td{padding:8px;border-bottom:1px solid #113a19;font-size:13px;}
+    th{text-transform:uppercase;font-size:11px;color:var(--text-dim);}
+    tr:hover td{background:rgba(57,255,20,0.03);}
+    .rank{color:var(--neon);font-weight:bold;}
     .right{text-align:right;}
     .center{text-align:center;}
-    .pos-up{ color:#4ade80; }
-    .pos-down{ color:#fb923c; }
-    .text-bad{ color:var(--danger); }
-    .small{
-      font-size:11px;
-      opacity:.8;
-    }
-
-    /* CARD DO GRÁFICO */
-    .chart-card{
-      margin-top:14px;
-      padding:10px 12px 12px;
-      border-radius:14px;
-      background:rgba(15,23,42,0.95);
-      border:1px solid rgba(30,64,175,0.85);
-      box-shadow:0 10px 30px rgba(15,23,42,0.9);
-    }
-    .chart-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:6px;
-      font-size:11px;
-      color:#9ca3af;
-    }
-    .chart-title{
-      font-weight:600;
-      text-transform:uppercase;
-      letter-spacing:0.08em;
-      color:#cbd5f5;
-    }
-    .chart-meta{
-      font-size:11px;
-      color:#a5b4fc;
-    }
-    #btcChart{
-      width:100%;
-      height:160px;
-      display:block;
-    }
-
-    .footer{
-      font-size:11px;
-      color:#9ca3af;
-      margin-top:8px;
-      opacity:.8;
-      display:flex;
-      justify-content:space-between;
-      gap:6px;
-      flex-wrap:wrap;
-    }
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      padding:2px 7px;
-      border-radius:999px;
-      font-size:11px;
-      border:1px solid rgba(148,163,184,0.9);
-      color:#e5e7eb;
-      background:rgba(15,23,42,0.9);
-    }
-    .chip span.emoji{
-      font-size:13px;
-    }
-    .chip-pos{
-      color:#bbf7d0;
-      border:1px solid #166534;
-      background:rgba(22,101,52,.25);
-    }
-    .chip-neg{
-      color:#fecaca;
-      border:1px solid #b91c1c;
-      background:rgba(127,29,29,.2);
-    }
-
-    @media (max-width:900px){
-      .header{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-      .controls{
-        align-items:flex-start;
-      }
-      table{
-        font-size:12px;
-      }
-      th,td{
-        padding:6px 4px;
-      }
-    }
+    .footer{font-size:12px;color:#7ee2b8;margin-top:10px;opacity:0.7;}
+    
+    /* Chips e controles */
+    .chip{display:inline-flex;align-items:center;gap:6px;background:#0f172a;border:1px solid #1e293b;border-radius:20px;padding:6px 12px;font-size:13px;cursor:pointer;transition:all 0.2s;}
+    .chip-pos{background:#065f46;border-color:#047857;color:#d1fae5;}
+    .chip:hover{opacity:0.8;}
+    .controls{display:flex;gap:8px;margin-bottom:15px;flex-wrap:wrap;}
+    .small{font-size:12px;color:#9ca3af;}
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <div class="header">
-      <div>
-        <h1>
-          <span class="logo">₿</span>
-          Ranking de Carteiras — Fundo da Família
-        </h1>
-        <p class="subtitle">
-          Painel em tempo real com base no backend do Money Tree.<br />
-          50% do lucro é distribuível entre os participantes, proporcionalmente ao valor aportado.
-        </p>
-      </div>
-      <div class="controls">
-        <div class="controls-top">
-          <label for="sortBy">Ordenar por:</label>
-          <select id="sortBy">
-            <option value="saldoBRL">Saldo (BRL)</option>
-            <option value="saldoBTC">Saldo (BTC)</option>
-            <option value="pct24h">24h (%)</option>
-            <option value="pct7d">7d (%)</option>
-            <option value="pct30d">30d (%)</option>
-            <option value="pct12m">12m (%)</option>
-            <option value="minhaCota50">Minha Cota (R$)</option>
-          </select>
-        </div>
-        <button id="refreshBtn">🔄 Atualizar agora</button>
-        <div class="update-info" id="lastUpdate">Atualizado: —</div>
-      </div>
-    </div>
+<div class="container">
+  <h1>🏆 Ranking de Carteiras — Fundo Familiar</h1>
+  <div class="muted">Atualização a cada 5 segundos • Lucro 50% ao vivo • Privacidade total</div>
 
-    <div class="ticker">
-      <div class="ticker-inner" id="tickerTrack">
-        <!-- Grupo A -->
-        <span class="pill" id="pillFundoA"></span>
-        <span class="pill" id="pillDistA"></span>
-        <span class="pill" id="pillTop1A"></span>
-        <span class="pill" id="pillTop2A"></span>
-        <span class="pill" id="pillTop3A"></span>
-        <!-- Grupo B (cópia pra loop infinito) -->
-        <span class="pill" id="pillFundoB"></span>
-        <span class="pill" id="pillDistB"></span>
-        <span class="pill" id="pillTop1B"></span>
-        <span class="pill" id="pillTop2B"></span>
-        <span class="pill" id="pillTop3B"></span>
-      </div>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Carteira</th>
-          <th>Saldo (BRL)</th>
-          <th>Saldo (BTC)</th>
-          <th>% do Fundo</th>
-          <th>24H</th>
-          <th>24H (R$)</th>
-          <th>7D</th>
-          <th>7D (R$)</th>
-          <th>30D</th>
-          <th>30D (R$)</th>
-          <th>12M</th>
-          <th>12M (R$)</th>
-          <th>50% do Lucro (R$)</th>
-          <th>Minha Cota (R$)</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-
-    <!-- CARD DO GRÁFICO BTC -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <span class="chart-title">BTC EM TEMPO REAL</span>
-        <span class="chart-meta" id="chartLastPrice">BTC ≈ —</span>
-      </div>
-      <canvas id="btcChart" width="1000" height="160"></canvas>
-    </div>
-
-    <div class="footer">
-      <span>Taxa de atualização: 5s • Fonte: /fund/state e /fund/summary • % do fundo com base no valor total em BRL.</span>
-      <span class="chip chip-pos"><span class="emoji">🌱</span> 50% do lucro é reinvestido no fundo, 50% é distribuível.</span>
-    </div>
+  <!-- Botão de Saque Dia 7 -->
+  <div class="controls">
+    <button id="btnSaqueDia7" class="chip chip-pos" style="cursor:pointer">💸 Solicitar Saque (dia 7)</button>
   </div>
 
+  <table>
+    <thead>
+      <tr>
+        <th class="center">#</th>
+        <th>Carteira</th>
+        <th class="right">Saldo (BRL)</th>
+        <th class="right">Saldo (BTC)</th>
+        <th class="right">Lucro 50% (BRL)</th>
+        <th class="right">Lucro (%)</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="footer">Fonte: /fund/state e /fund/summary</div>
+</div>
+
+<!-- Modal de Saque -->
+<div id="modalSaque" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); align-items:center; justify-content:center; z-index:9999">
+  <div style="width:min(420px,94vw); background:#0b1220; border:1px solid #1f2937; border-radius:14px; padding:14px">
+    <h3 style="margin:0 0 8px">Saque do Lucro (apenas dia 7)</h3>
+    <p class="small" id="dia7Info"></p>
+    <div style="display:grid; gap:8px; margin-top:8px">
+      <input id="wdAddress" placeholder="Endereço BTC (bc1...)" style="background:#020617;border:1px solid #374151;border-radius:8px;padding:8px;color:#e5e7eb">
+      <input id="wdKeyword" placeholder="Palavra-chave" type="password" style="background:#020617;border:1px solid #374151;border-radius:8px;padding:8px;color:#e5e7eb">
+      <input id="wdAmountBRL" type="number" step="0.01" placeholder="Valor (BRL) — opcional" style="background:#020617;border:1px solid #374151;border-radius:8px;padding:8px;color:#e5e7eb">
+      <button id="wdSubmit" class="chip chip-pos" style="justify-content:center">Enviar pedido</button>
+      <button id="wdClose" class="chip" style="justify-content:center">Fechar</button>
+      <div id="wdMsg" class="small"></div>
+    </div>
+  </div>
+</div>
+
 <script>
-(function(){
-  const BACKEND = 'https://consistency-anytime-minneapolis-shorter.trycloudflare.com';
-  const POLL_MS = 5000;
+// TROQUE PELO SEU TRY-CLOUDFLARE QUANDO FOR PARA A FAMÍLIA:
+const BACKEND = "https://attribute-hierarchy-restoration-und.trycloudflare.com";
 
-  let state = {
-    wallets: [],
-    sortBy: 'saldoBRL'
-  };
+let wallets = [];
+let btcBRL = 0;
 
-  let priceBRLperBTC = 0;
-  let fundTotalBRL = 0;
-
-  // lucro bruto do fundo e 50% distribuível (regras do Money Tree)
-  let grossProfitBRL = 0;
-  let distributableBRL = 0;
-  let totalContribBRL = 0;
-
-  // histórico de preços do BTC para o gráfico
-  const MAX_POINTS = 60; // ~5 min se atualizar a cada 5s
-  let priceHistory = [];
-
-  function fmtBRL(v){
-    if (!isFinite(v)) v = 0;
-    return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2});
-  }
-  function fmtBTC(v){
-    if (!isFinite(v)) v = 0;
-    return v.toFixed(6);
-  }
-  function fmtPct(v){
-    if (!isFinite(v)) v = 0;
-    const sign = v>0?'+':'';
-    return sign+v.toFixed(2)+'%';
-  }
-  function shortAddr(a){
-    const s = String(a||'');
-    if (s.length<=10) return s;
-    return s.slice(0,6)+'…'+s.slice(-6);
-  }
-
-  // LÊ /fund/summary DO TEU SERVIDOR (que já chama a Binance)
-  async function fetchSummary(){
-    try{
-      const r = await fetch(`${BACKEND}/fund/summary`);
-      const j = await r.json();
-      if (!j || !j.ok) return;
-
-      // total em BRL (já vem pronto)
-      fundTotalBRL =
-        Number(j.totalBRL ?? (j.conversions && j.conversions.BRL) ?? 0);
-
-      // taxas da Binance que o server já buscou
-      const rates = j.rates || {};
-      const conv  = j.conversions || {};
-
-      const usdtbrl = Number(rates.usdtbrl || 0);
-      const btcusdt = Number(rates.btcusdt || 0);
-
-      // 1) preferimos usar as taxas diretas
-      if (usdtbrl > 0 && btcusdt > 0){
-        priceBRLperBTC = btcusdt * usdtbrl;
-      }
-      // 2) fallback: usa conversões BTC/BRL do resumo
-      else if (conv.BTC > 0 && conv.BRL > 0){
-        priceBRLperBTC = conv.BRL / conv.BTC;
-      } else {
-        priceBRLperBTC = 0;
-      }
-    } catch(e){
-      console.error('Erro ao buscar /fund/summary', e);
+//---------------------------------------------
+// BUSCA COTAÇÃO
+//---------------------------------------------
+async function getPrice() {
+  try {
+    const r = await fetch(`${BACKEND}/fund/summary`);
+    const j = await r.json();
+    if (j.rates?.btcusdt && j.rates?.usdtbrl) {
+      btcBRL = j.rates.btcusdt * j.rates.usdtbrl;
     }
+  } catch(e){ console.log("Erro cotação", e); }
+}
+
+//---------------------------------------------
+// BUSCA CARTEIRAS + CÁLCULOS
+//---------------------------------------------
+async function getWallets() {
+  try {
+    const r = await fetch(`${BACKEND}/fund/state`);
+    const j = await r.json();
+
+    if (!j.ok) return [];
+
+    return j.participants
+      .filter(p => p.btcAddress)
+      .map(p => {
+        const invest = Number(p.totalContributed || 0);
+        const lucroTotal = Number(p.accruedProfit || 0);
+
+        // LÓGICA DO ADM — divisão do lucro
+        const lucro50 = lucroTotal * 0.50;
+        const saldoFinal = invest + lucro50;
+
+        const lucroPercent =
+          invest > 0 ? (lucro50 / invest) * 100 : 0;
+
+        return {
+          address: p.btcAddress,
+          invest,
+          lucro50,
+          lucroPercent,
+          saldoBRL: saldoFinal,
+          saldoBTC: btcBRL ? saldoFinal / btcBRL : 0
+        };
+      });
+
+  } catch(e){ console.log("Erro fund/state", e); return []; }
+}
+
+//---------------------------------------------
+// FORMATADORES
+//---------------------------------------------
+function fmtBRL(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function fmtBTC(v){return v.toFixed(6);}
+function fmtPct(v){return v.toFixed(2)+"%";}
+function shortAddr(a){return a.slice(0,6)+"…"+a.slice(-6);}
+
+//---------------------------------------------
+// DESENHA TABELA
+//---------------------------------------------
+function render() {
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  const sorted = [...wallets].sort((a,b)=> b.saldoBRL - a.saldoBRL);
+
+  sorted.forEach((w,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="center rank">${i+1}</td>
+      <td>${shortAddr(w.address)}</td>
+      <td class="right">${fmtBRL(w.saldoBRL)}</td>
+      <td class="right">${fmtBTC(w.saldoBTC)} BTC</td>
+      <td class="right">${fmtBRL(w.lucro50)}</td>
+      <td class="right">${fmtPct(w.lucroPercent)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+//---------------------------------------------
+// CICLO PRINCIPAL
+//---------------------------------------------
+async function update() {
+  await getPrice();
+  wallets = await getWallets();
+  render();
+}
+
+// ---- Boleta dia 7 (painel.html) ----
+function isDia7Now(){
+  // America/Sao_Paulo
+  const now = new Date();
+  const dia = new Intl.DateTimeFormat('pt-BR',{ timeZone:'America/Sao_Paulo', day:'2-digit'}).format(now);
+  return Number(dia) === 7;
+}
+
+function openModalSaque(){
+  const modal = document.getElementById('modalSaque');
+  const info  = document.getElementById('dia7Info');
+  const ok = isDia7Now();
+  info.textContent = ok
+    ? 'Saque liberado: hoje é dia 7. Se o lucro convertido for menor que 0.0001 BTC, o sistema reinveste automaticamente.'
+    : 'Bloqueado: o saque só é permitido no dia 7 (horário de São Paulo).';
+  document.getElementById('wdSubmit').disabled = !ok;
+  modal.style.display = 'flex';
+}
+
+document.getElementById('btnSaqueDia7').onclick = openModalSaque;
+document.getElementById('wdClose').onclick = ()=> (document.getElementById('modalSaque').style.display='none');
+
+async function postJSON(url, body){
+  const r = await fetch(url,{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error('Falha de rede');
+  return r.json();
+}
+
+document.getElementById('wdSubmit').onclick = async ()=>{
+  const msg = document.getElementById('wdMsg');
+  msg.textContent = 'Enviando...';
+  try{
+    const payload = {
+      address: (document.getElementById('wdAddress').value||'').trim(),
+      keyword: (document.getElementById('wdKeyword').value||'').trim(),
+      amountBRL: Number(document.getElementById('wdAmountBRL').value||0) || null
+    };
+    const out = await postJSON(`${BACKEND}/fund/withdraw-request`, payload);
+    msg.textContent = out.ok ? `✅ Pedido #${out.id} criado. Status: ${out.status}` : (out.error||'Erro');
+  }catch(e){
+    msg.textContent = 'Erro ao enviar pedido.';
   }
+};
 
-  async function fetchWallets(){
-    try{
-      const r = await fetch(`${BACKEND}/fund/state`);
-      const j = await r.json();
-      if (!j || !j.ok || !Array.isArray(j.participants)) {
-        return { wallets: [] };
-      }
-
-      const wallets = j.participants
-        .filter(p => p.btcAddress && String(p.btcAddress).trim() !== '')
-        .map(p => {
-          const saldoBRL = Number(p.totalContributed || 0); // base: total aportado
-          return {
-            address: p.btcAddress,
-            saldoBRL,
-            pct24h: Number(p.pct24h || 0),
-            pct7d:  Number(p.pct7d  || 0),
-            pct30d: Number(p.pct30d || 0),
-            pct12m: Number(p.pct12m || p.pctYear || p.pctAnual || 0)
-          };
-        });
-
-      return { wallets };
-    } catch(e){
-      console.error('Erro ao buscar /fund/state', e);
-      return { wallets: [] };
-    }
-  }
-
-  function ensureBTC(wallet){
-    if (wallet.saldoBTC && wallet.saldoBTC > 0) return wallet.saldoBTC;
-    if (wallet.saldoBRL && priceBRLperBTC > 0) return wallet.saldoBRL / priceBRLperBTC;
-    return 0;
-  }
-
-  // soma dos aportes em BRL (base para ratear os 50% de lucro)
-  function sumContrib(wallets){
-    return (wallets || []).reduce((acc, w) => acc + (Number(w.saldoBRL) || 0), 0);
-  }
-
-  function setText(id, text){
-    const el = document.getElementById(id);
-    if (el) el.textContent = text || '';
-  }
-
-  function renderTicker(){
-    const wallets = state.wallets || [];
-    const fundoText = fundTotalBRL > 0 ? `Fundo ≈ ${fmtBRL(fundTotalBRL)}` : '';
-    const distText  = distributableBRL > 0 ? `50% distribuível ≈ ${fmtBRL(distributableBRL)}` : '';
-
-    const top = [...wallets].sort((a,b)=> (b.saldoBRL||0)-(a.saldoBRL||0)).slice(0,3);
-    const topText = top.map((it,idx)=> `Top ${idx+1}: ${shortAddr(it.address)} — ${fmtBRL(it.saldoBRL||0)}`);
-
-    // Grupo A
-    setText('pillFundoA', fundoText);
-    setText('pillDistA',  distText);
-    setText('pillTop1A',  topText[0] || '');
-    setText('pillTop2A',  topText[1] || '');
-    setText('pillTop3A',  topText[2] || '');
-
-    // Grupo B (cópia)
-    setText('pillFundoB', fundoText);
-    setText('pillDistB',  distText);
-    setText('pillTop1B',  topText[0] || '');
-    setText('pillTop2B',  topText[1] || '');
-    setText('pillTop3B',  topText[2] || '');
-  }
-
-  // DESENHA GRÁFICO DO BTC
-  function renderChart(){
-    const canvas = document.getElementById('btcChart');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
-
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle = 'rgba(15,23,42,1)';
-    ctx.fillRect(0,0,w,h);
-
-    const paddingLeft = 40;
-    const paddingRight = 8;
-    const paddingTop = 8;
-    const paddingBottom = 20;
-
-    if (priceHistory.length < 2){
-      ctx.fillStyle = '#9ca3af';
-      ctx.font = '11px system-ui';
-      ctx.fillText('Aguardando dados do BTC...', paddingLeft, h/2);
-      return;
-    }
-
-    const prices = priceHistory.map(p => p.price);
-    let minPrice = Math.min(...prices);
-    let maxPrice = Math.max(...prices);
-
-    if (minPrice === maxPrice){
-      minPrice *= 0.99;
-      maxPrice *= 1.01;
-    }
-
-    const span = maxPrice - minPrice;
-
-    // eixo X/Y
-    ctx.strokeStyle = 'rgba(148,163,184,0.8)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(paddingLeft, paddingTop);
-    ctx.lineTo(paddingLeft, h-paddingBottom);
-    ctx.lineTo(w-paddingRight, h-paddingBottom);
-    ctx.stroke();
-
-    // linhas horizontais (grid) + labels Y
-    ctx.fillStyle = '#9ca3af';
-    ctx.font = '10px system-ui';
-    const gridLines = 4;
-    for (let i=0;i<=gridLines;i++){
-      const y = paddingTop + (h-paddingTop-paddingBottom) * (i/gridLines);
-      ctx.strokeStyle = 'rgba(30,64,175,0.35)';
-      ctx.beginPath();
-      ctx.moveTo(paddingLeft, y);
-      ctx.lineTo(w-paddingRight, y);
-      ctx.stroke();
-
-      const value = maxPrice - span * (i/gridLines);
-      ctx.fillText(value.toFixed(0), 3, y+3);
-    }
-
-    // labels de tempo no eixo X
-    const n = priceHistory.length;
-    const ticks = 4;
-    for (let i=0;i<=ticks;i++){
-      const idx = Math.round((n-1)*i/ticks);
-      const point = priceHistory[idx];
-      if (!point) continue;
-      const x = paddingLeft + (w-paddingLeft-paddingRight) * (idx/(n-1));
-      const t = point.t;
-      const label = t.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      ctx.fillText(label, x-16, h-4);
-    }
-
-    // linha de preço
-    ctx.beginPath();
-    for (let i=0;i<n;i++){
-      const p = priceHistory[i];
-      const x = paddingLeft + (w-paddingLeft-paddingRight) * (i/(n-1));
-      const y = paddingTop + (h-paddingTop-paddingBottom) * (1 - (p.price - minPrice) / span);
-      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    }
-    ctx.strokeStyle = '#4ade80';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // ponto final
-    const last = priceHistory[n-1];
-    const lx = paddingLeft + (w-paddingLeft-paddingRight);
-    const ly = paddingTop + (h-paddingTop-paddingBottom) * (1 - (last.price - minPrice) / span);
-    ctx.fillStyle = '#4ade80';
-    ctx.beginPath();
-    ctx.arc(lx, ly, 3, 0, Math.PI*2);
-    ctx.fill();
-  }
-
-  function render(){
-    const tbody = document.getElementById('tbody');
-    const sortBy = state.sortBy || 'saldoBRL';
-    const wallets = state.wallets || [];
-
-    // calcula base de rateio e lucro do fundo (>=0)
-    totalContribBRL = sumContrib(wallets);
-    grossProfitBRL = Math.max(fundTotalBRL - totalContribBRL, 0);
-    distributableBRL = grossProfitBRL * 0.5;
-
-    const ranked = [...wallets].map(w => {
-      const saldoBRL = Number(w.saldoBRL || 0);
-      const saldoBTC = ensureBTC(w);
-      const share = fundTotalBRL>0 ? saldoBRL/fundTotalBRL*100 : 0;
-      const baseShare = totalContribBRL>0 ? (saldoBRL/totalContribBRL) : 0;
-      const minhaCota50 = distributableBRL * baseShare;
-
-      return {
-        ...w,
-        saldoBRL,
-        saldoBTC,
-        share,
-        baseShare,
-        minhaCota50
-      };
-    });
-
-    ranked.sort((a,b)=>{
-      const av = a[sortBy] || 0;
-      const bv = b[sortBy] || 0;
-      return bv-av;
-    });
-
-    tbody.innerHTML = '';
-
-    ranked.forEach((w,idx)=>{
-      const saldo24h = (w.saldoBRL||0) * (w.pct24h||0) / 100;
-      const saldo7d  = (w.saldoBRL||0) * (w.pct7d ||0) / 100;
-      const saldo30d = (w.saldoBRL||0) * (w.pct30d||0) / 100;
-      const saldo12m = (w.saldoBRL||0) * (w.pct12m||0) / 100;
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="rank">${idx+1}</td>
-        <td>${shortAddr(w.address)}</td>
-        <td class="right">${fmtBRL(w.saldoBRL||0)}</td>
-        <td class="right">${fmtBTC(w.saldoBTC||0)} BTC</td>
-        <td class="right small">${fmtPct(w.share||0)}</td>
-        <td class="right ${w.pct24h>=0 ? 'pos-up' : 'text-bad'}">${fmtPct(w.pct24h||0)}</td>
-        <td class="right small ${saldo24h>=0 ? 'pos-up' : 'text-bad'}">${fmtBRL(saldo24h)}</td>
-        <td class="right ${w.pct7d>=0 ? 'pos-up' : 'text-bad'}">${fmtPct(w.pct7d||0)}</td>
-        <td class="right small ${saldo7d>=0 ? 'pos-up' : 'text-bad'}">${fmtBRL(saldo7d)}</td>
-        <td class="right ${w.pct30d>=0 ? 'pos-up' : 'text-bad'}">${fmtPct(w.pct30d||0)}</td>
-        <td class="right small ${saldo30d>=0 ? 'pos-up' : 'text-bad'}">${fmtBRL(saldo30d)}</td>
-        <td class="right ${w.pct12m>=0 ? 'pos-up' : 'text-bad'}">${fmtPct(w.pct12m||0)}</td>
-        <td class="right small ${saldo12m>=0 ? 'pos-up' : 'text-bad'}">${fmtBRL(saldo12m)}</td>
-        <td class="right small">${fmtBRL(distributableBRL)}</td>
-        <td class="right"><strong>${fmtBRL(w.minhaCota50 || 0)}</strong></td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    document.getElementById('lastUpdate').textContent =
-      'Atualizado: ' + new Date().toLocaleString('pt-BR');
-
-    // atualiza texto com preço atual do BTC
-    const chartMeta = document.getElementById('chartLastPrice');
-    if (chartMeta){
-      chartMeta.textContent = priceBRLperBTC > 0
-        ? `BTC ≈ ${fmtBRL(priceBRLperBTC)}`
-        : 'BTC ≈ —';
-    }
-
-    // ticker e gráfico
-    renderTicker();
-    renderChart();
-  }
-
-  async function tick(){
-    state.sortBy = document.getElementById('sortBy').value || 'saldoBRL';
-
-    // 1) resumo do fundo (inclui preço do BTC via Binance)
-    await fetchSummary();
-
-    // guarda no histórico do BTC para o gráfico
-    if (priceBRLperBTC > 0){
-      priceHistory.push({ t: new Date(), price: priceBRLperBTC });
-      if (priceHistory.length > MAX_POINTS){
-        priceHistory.shift(); // tira o mais antigo
-      }
-    }
-
-    // 2) carteiras
-    const { wallets } = await fetchWallets();
-    state.wallets = wallets;
-
-    // 3) renderiza tudo
-    render();
-  }
-
-  document.getElementById('refreshBtn').addEventListener('click', tick);
-  document.getElementById('sortBy').addEventListener('change', render);
-
-  // inicializa
-  tick();
-  setInterval(tick, POLL_MS);
-})();
+setInterval(update, 5000);
+update();
 </script>
+
 </body>
 </html>
