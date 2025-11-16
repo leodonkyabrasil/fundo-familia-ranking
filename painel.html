@@ -303,6 +303,19 @@
       z-index:9999;
       backdrop-filter: blur(8px);
     }
+    
+    /* Modal de Depósito */
+    #modalDeposito{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.75);
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      backdrop-filter: blur(8px);
+    }
+
     .modal-content{
       width:min(420px,94vw);
       background:rgba(15,23,42,0.98);
@@ -375,6 +388,7 @@
             <option value="minhaCota50">Minha Cota (R$)</option>
           </select>
           <button id="btnSaqueDia7" class="chip chip-pos" style="cursor:pointer">💸 Saque (dia 7)</button>
+          <button id="btnDeposito" class="chip" style="cursor:pointer">📥 Depósito (dia 7)</button>
         </div>
         <button id="refreshBtn">🔄 Atualizar agora</button>
         <div class="update-info" id="lastUpdate">Atualizado: —</div>
@@ -445,9 +459,62 @@
         <input id="wdAddress" placeholder="Endereço BTC (bc1...)" style="margin-bottom: 0;">
         <input id="wdKeyword" placeholder="Palavra-chave" type="password" style="margin-bottom: 0;">
         <input id="wdAmountBRL" type="number" step="0.01" placeholder="Valor (BRL) — opcional" style="margin-bottom: 0;">
+
+        <label class="small"
+               style="display:flex; align-items:center; gap:6px; margin-top:4px; color:#9ca3af;">
+          <input type="checkbox" id="wdAll">
+          Sacar todo o lucro disponível (Minha Cota)
+        </label>
+
         <button id="wdSubmit" class="chip chip-pos" style="justify-content:center; margin-top: 5px;">Enviar pedido</button>
         <button id="wdClose" class="chip" style="justify-content:center;">Fechar</button>
         <div id="wdMsg" class="small" style="text-align: center; margin-top: 8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Depósito -->
+  <div id="modalDeposito">
+    <div class="modal-content">
+      <h3>📥 Depósito no Fundo (apenas dia 7)</h3>
+      <p class="small" id="depDia7Info" style="margin-bottom: 10px; color: #9ca3af;"></p>
+
+      <div class="small" style="margin-bottom:10px; color:#9ca3af;">
+        <strong>Carteira oficial do fundo (ADM):</strong>
+        <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+          <input id="admWalletDisplay" readonly style="flex:1; font-size:11px;">
+          <button id="btnCopyAdmWallet" class="chip" type="button">📋 Copiar</button>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin:10px 0;">
+        <button id="tabDepExistente" class="chip chip-pos" type="button">Já sou participante</button>
+        <button id="tabDepNovo" class="chip" type="button">Sou novo participante</button>
+      </div>
+
+      <!-- Bloco: Já sou participante -->
+      <div id="depExistenteBlock" style="display:grid; gap:10px;">
+        <input id="depAddressExistente" placeholder="Sua carteira BTC cadastrada">
+        <input id="depKeywordExistente" type="password" placeholder="Sua palavra-chave cadastrada">
+        <input id="depAmountBTCExistente" type="number" step="0.000001" placeholder="Valor enviado (BTC)">
+      </div>
+
+      <!-- Bloco: Novo participante -->
+      <div id="depNovoBlock" style="display:none; gap:10px; margin-top:12px;">
+        <input id="depNomeNovo" placeholder="Seu nome completo">
+        <input id="depAddressNovo" placeholder="Carteira BTC (que será cadastrada)">
+        <input id="depKeywordNovo" type="password" placeholder="Defina uma palavra-chave">
+        <input id="depKeywordNovo2" type="password" placeholder="Repita a palavra-chave">
+        <input id="depAmountBTCNovo" type="number" step="0.000001" placeholder="Valor enviado (BTC)">
+        <p class="small" style="color:#9ca3af; margin:0;">
+          Esta carteira e palavra-chave serão usadas para futuros saques e depósitos.
+        </p>
+      </div>
+
+      <div style="display:grid; gap:10px; margin-top:15px;">
+        <button id="depSubmit" class="chip chip-pos" style="justify-content:center;">Registrar depósito</button>
+        <button id="depClose" class="chip" style="justify-content:center;">Fechar</button>
+        <div id="depMsg" class="small" style="text-align:center; margin-top:8px;"></div>
       </div>
     </div>
   </div>
@@ -456,6 +523,9 @@
 (function(){
   const BACKEND = 'https://attribute-hierarchy-restoration-und.trycloudflare.com';
   const POLL_MS = 5000;
+
+  // TROCAR abaixo pela carteira BTC ADM real do fundo:
+  const ADM_WALLET = 'SUA_CARTEIRA_ADM_BTC_AQUI';
 
   let state = {
     wallets: [],
@@ -517,19 +587,204 @@
   document.getElementById('btnSaqueDia7').onclick = openModalSaque;
   document.getElementById('wdClose').onclick = ()=> (document.getElementById('modalSaque').style.display='none');
 
+  // Se marcar "sacar todo o lucro", desabilita o campo de valor
+  const wdAll = document.getElementById('wdAll');
+  if (wdAll) {
+    wdAll.onchange = () => {
+      const inp = document.getElementById('wdAmountBRL');
+      if (!inp) return;
+      if (wdAll.checked) {
+        inp.value = '';
+        inp.disabled = true;
+      } else {
+        inp.disabled = false;
+      }
+    };
+  }
+
   document.getElementById('wdSubmit').onclick = async ()=>{
     const msg = document.getElementById('wdMsg');
     msg.textContent = 'Enviando...';
     try{
-      const payload = {
-        address: (document.getElementById('wdAddress').value||'').trim(),
-        keyword: (document.getElementById('wdKeyword').value||'').trim(),
-        amountBRL: Number(document.getElementById('wdAmountBRL').value||0) || null
-      };
+      const address = (document.getElementById('wdAddress').value||'').trim();
+      const keyword = (document.getElementById('wdKeyword').value||'').trim();
+      const all = document.getElementById('wdAll');
+      const amountInput = document.getElementById('wdAmountBRL');
+
+      if (!address) {
+        msg.textContent = 'Informe o endereço BTC.';
+        return;
+      }
+      if (!keyword) {
+        msg.textContent = 'Informe a palavra-chave.';
+        return;
+      }
+
+      let amountBRL = null;
+      if (!all?.checked && amountInput && amountInput.value) {
+        amountBRL = Number((amountInput.value || '').replace(',', '.')) || null;
+      }
+
+      const payload = { address, keyword, amountBRL };
+
       const out = await postJSON(`${BACKEND}/fund/withdraw-request`, payload);
-      msg.textContent = out.ok ? `✅ Pedido #${out.id} criado. Status: ${out.status}` : (out.error||'Erro');
+      if (out.ok) {
+        msg.textContent = out.status === 'REINVESTIDO_AUTO'
+          ? '✅ Valor reinvestido automaticamente (menor que 0.0001 BTC).'
+          : `✅ Pedido #${out.id} criado. Status: ${out.status}`;
+      } else {
+        msg.textContent = out.error || 'Erro ao enviar pedido.';
+      }
     }catch(e){
+      console.error(e);
       msg.textContent = 'Erro ao enviar pedido.';
+    }
+  };
+
+  // ===== DEPÓSITO =====
+
+  // Abre modal de depósito
+  const btnDeposito = document.getElementById('btnDeposito');
+  if (btnDeposito) {
+    btnDeposito.onclick = () => {
+      const modal = document.getElementById('modalDeposito');
+      const info = document.getElementById('depDia7Info');
+      const is7 = isDia7Now();
+
+      info.textContent = is7
+        ? 'Depósito liberado: hoje é dia 7. Envie o BTC para a carteira ADM e registre abaixo.'
+        : 'Bloqueado: depósitos só são permitidos no dia 7 (horário de São Paulo).';
+
+      document.getElementById('depSubmit').disabled = !is7;
+
+      // Preencher carteira ADM e deixar pronta para copy
+      const admInput = document.getElementById('admWalletDisplay');
+      if (admInput) admInput.value = ADM_WALLET || '';
+
+      modal.style.display = 'flex';
+    };
+  }
+
+  // Fechar modal de depósito
+  document.getElementById('depClose').onclick = () => {
+    document.getElementById('modalDeposito').style.display = 'none';
+  };
+
+  // Copiar carteira ADM
+  const btnCopyAdmWallet = document.getElementById('btnCopyAdmWallet');
+  if (btnCopyAdmWallet) {
+    btnCopyAdmWallet.onclick = async () => {
+      const admInput = document.getElementById('admWalletDisplay');
+      const addr = admInput ? admInput.value : ADM_WALLET;
+      if (!addr) return;
+
+      try {
+        await navigator.clipboard.writeText(addr);
+        alert('Carteira do fundo copiada para a área de transferência.');
+      } catch (e) {
+        // fallback simples
+        window.prompt('Copie manualmente a carteira do fundo:', addr);
+      }
+    };
+  }
+
+  // Alternar entre "já sou participante" x "novo participante"
+  const tabExist = document.getElementById('tabDepExistente');
+  const tabNovo  = document.getElementById('tabDepNovo');
+  const blockExist = document.getElementById('depExistenteBlock');
+  const blockNovo  = document.getElementById('depNovoBlock');
+
+  function setDepTab(mode){
+    if (mode === 'existente') {
+      tabExist.classList.add('chip-pos');
+      tabNovo.classList.remove('chip-pos');
+      blockExist.style.display = 'grid';
+      blockNovo.style.display  = 'none';
+    } else {
+      tabNovo.classList.add('chip-pos');
+      tabExist.classList.remove('chip-pos');
+      blockExist.style.display = 'none';
+      blockNovo.style.display  = 'grid';
+    }
+  }
+
+  if (tabExist && tabNovo) {
+    tabExist.onclick = () => setDepTab('existente');
+    tabNovo.onclick  = () => setDepTab('novo');
+  }
+
+  // Enviar depósito
+  document.getElementById('depSubmit').onclick = async () => {
+    const msg = document.getElementById('depMsg');
+    msg.textContent = 'Enviando...';
+
+    try {
+      const is7 = isDia7Now();
+      if (!is7) {
+        msg.textContent = 'Depósito só é permitido no dia 7.';
+        return;
+      }
+
+      const modoNovo = blockNovo.style.display !== 'none';
+
+      let address, keyword, amountBTC, name = null;
+
+      if (!modoNovo) {
+        // Já sou participante
+        address   = (document.getElementById('depAddressExistente').value || '').trim();
+        keyword   = (document.getElementById('depKeywordExistente').value || '').trim();
+        amountBTC = Number((document.getElementById('depAmountBTCExistente').value || '').replace(',', '.'));
+      } else {
+        // Novo participante
+        name      = (document.getElementById('depNomeNovo').value || '').trim();
+        address   = (document.getElementById('depAddressNovo').value || '').trim();
+        const k1  = (document.getElementById('depKeywordNovo').value || '').trim();
+        const k2  = (document.getElementById('depKeywordNovo2').value || '').trim();
+        keyword   = k1;
+        amountBTC = Number((document.getElementById('depAmountBTCNovo').value || '').replace(',', '.'));
+
+        if (!name) {
+          msg.textContent = 'Informe seu nome para criar o cadastro.';
+          return;
+        }
+        if (!k1 || !k2 || k1 !== k2) {
+          msg.textContent = 'As duas digitações da palavra-chave precisam ser iguais.';
+          return;
+        }
+      }
+
+      if (!address) {
+        msg.textContent = 'Informe sua carteira BTC.';
+        return;
+      }
+      if (!keyword) {
+        msg.textContent = 'Informe a palavra-chave.';
+        return;
+      }
+      if (!amountBTC || amountBTC <= 0) {
+        msg.textContent = 'Informe um valor de BTC maior que zero.';
+        return;
+      }
+
+      const payload = {
+        address,
+        keyword,
+        amountBTC,
+        name,
+        isNew: !!modoNovo
+      };
+
+      const out = await postJSON(`${BACKEND}/fund/deposit-btc`, payload);
+
+      if (out.ok) {
+        const brl = Number(out.amountBRL || 0);
+        msg.textContent = `✅ Depósito registrado! Aproximadamente R$ ${brl.toFixed(2)} adicionados ao seu aporte.`;
+      } else {
+        msg.textContent = out.error || 'Erro ao registrar depósito.';
+      }
+    } catch (e) {
+      console.error(e);
+      msg.textContent = 'Erro ao registrar depósito.';
     }
   };
 
