@@ -345,6 +345,24 @@
       box-shadow:0 0 0 2px rgba(59,130,246,0.2);
     }
 
+    /* Campo de busca */
+    .search-container {
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .search-container input {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 13px;
+      border-radius: 8px;
+      border: 1px solid #3b82f6;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    .search-container input::placeholder {
+      color: #9ca3af;
+    }
+
     @media (max-width:900px){
       .header{
         flex-direction:column;
@@ -412,6 +430,11 @@
       </div>
     </div>
 
+    <!-- Campo de busca -->
+    <div class="search-container">
+      <input id="filtroCarteira" placeholder="🔍 Buscar carteira...">
+    </div>
+
     <table>
       <thead>
         <tr>
@@ -456,8 +479,8 @@
       <h3>💸 Saque do Lucro</h3>
       <p class="small" id="dia7Info" style="margin-bottom: 15px; color: #9ca3af;"></p>
       <div style="display:grid; gap:10px;">
-        <input id="wdAddress" placeholder="Endereço BTC (bc1...)" style="margin-bottom: 0;">
-        <input id="wdKeyword" placeholder="Palavra-chave" type="password" style="margin-bottom: 0;">
+        <input id="btcAddress" placeholder="Endereço BTC (bc1...)" style="margin-bottom: 0;">
+        <input id="keyword" placeholder="Palavra-chave" type="password" style="margin-bottom: 0;">
         <input id="wdAmountBRL" type="number" step="0.01" placeholder="Valor (BRL) — opcional" style="margin-bottom: 0;">
 
         <label class="small"
@@ -520,8 +543,10 @@
   </div>
 
 <script>
+// BACKEND URL - definida globalmente para acesso por todas as funções
+const BACKEND = 'https://attribute-hierarchy-restoration-und.trycloudflare.com';
+
 (function(){
-  const BACKEND = 'https://attribute-hierarchy-restoration-und.trycloudflare.com';
   const POLL_MS = 5000;
 
   // TROCAR abaixo pela carteira BTC ADM real do fundo:
@@ -561,6 +586,8 @@
 
   // Funções de Saque
   function isDia7Now(){
+    // Para testes, descomente a linha abaixo para forçar o dia 7
+    // return true;
     const now = new Date();
     const dia = new Intl.DateTimeFormat('pt-BR',{ timeZone:'America/Sao_Paulo', day:'2-digit'}).format(now);
     return Number(dia) === 7;
@@ -606,8 +633,8 @@
     const msg = document.getElementById('wdMsg');
     msg.textContent = 'Enviando...';
     try{
-      const address = (document.getElementById('wdAddress').value||'').trim();
-      const keyword = (document.getElementById('wdKeyword').value||'').trim();
+      const address = (document.getElementById('btcAddress').value||'').trim();
+      const keyword = (document.getElementById('keyword').value||'').trim();
       const all = document.getElementById('wdAll');
       const amountInput = document.getElementById('wdAmountBRL');
 
@@ -1069,11 +1096,19 @@
   setInterval(tick, POLL_MS);
 })();
 
-// 🔧 PASSO 2 – Função de Resgatar Tudo
+// 🔧 Função de Resgatar Tudo com todas as correções
 async function resgatarTudoAutomatico() {
+  // Verificar se é dia 7
+  const hoje = new Date();
+  const dia = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit' }).format(hoje);
+  if (Number(dia) !== 7) {
+    alert("⚠️ O resgate total só é permitido no dia 7.");
+    return;
+  }
+
   // Usar os campos do modal de saque existente
-  const address = document.getElementById('wdAddress').value;
-  const keyword = document.getElementById('wdKeyword').value;
+  const address = document.getElementById('btcAddress').value;
+  const keyword = document.getElementById('keyword').value;
 
   if (!address || !keyword) {
     alert("⚠️ Insira a carteira BTC e a palavra-chave.");
@@ -1082,7 +1117,7 @@ async function resgatarTudoAutomatico() {
 
   try {
     // Obter o estado atual da carteira (aporte + lucro)
-    const stateRes = await fetch('/fund/state', {
+    const stateRes = await fetch(`${BACKEND}/fund/state`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address, keyword })
@@ -1102,7 +1137,7 @@ async function resgatarTudoAutomatico() {
     }
 
     // Solicitar resgate total
-    const res = await fetch('/fund/principal-return-request', {
+    const res = await fetch(`${BACKEND}/fund/principal-return-request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1122,6 +1157,21 @@ async function resgatarTudoAutomatico() {
     alert("❌ Erro na operação: " + err.message);
   }
 }
+
+// 🔍 Campo de busca para filtrar carteiras
+document.addEventListener('DOMContentLoaded', function() {
+  const filtroCarteira = document.getElementById('filtroCarteira');
+  if (filtroCarteira) {
+    filtroCarteira.addEventListener('input', (e) => {
+      const termo = e.target.value.trim().toLowerCase();
+      const linhas = document.querySelectorAll('#tbody tr');
+      linhas.forEach((linha) => {
+        const texto = linha.cells[1].textContent.toLowerCase();
+        linha.style.display = texto.includes(termo) ? '' : 'none';
+      });
+    });
+  }
+});
 </script>
 </body>
 </html>
