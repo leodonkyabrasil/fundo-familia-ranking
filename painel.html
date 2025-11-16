@@ -587,7 +587,7 @@ const BACKEND = 'https://attribute-hierarchy-restoration-und.trycloudflare.com';
   // Funções de Saque
   function isDia7Now(){
     // Para testes, descomente a linha abaixo para forçar o dia 7
-    // return true;
+    return true;
     const now = new Date();
     const dia = new Intl.DateTimeFormat('pt-BR',{ timeZone:'America/Sao_Paulo', day:'2-digit'}).format(now);
     return Number(dia) === 7;
@@ -1175,3 +1175,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
