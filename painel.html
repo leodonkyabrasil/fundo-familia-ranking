@@ -406,7 +406,7 @@
             <option value="minhaCota50">Minha Cota (R$)</option>
           </select>
           <button id="btnSaqueDia7" class="chip chip-pos" style="cursor:pointer">💸 Saque</button>
-          <button onclick="resgatarTudoAutomatico()" class="btn btn-danger">💸 Resgatar Tudo</button>
+          <button onclick="resgatarTudoAutomatico()" class="chip chip-pos" style="cursor:pointer">💸 Resgatar Tudo</button>
           <button id="btnDeposito" class="chip" style="cursor:pointer">📥 Depósito</button>
         </div>
         <div class="update-info" id="lastUpdate">Atualizado: —</div>
@@ -587,7 +587,7 @@ const BACKEND = 'https://attribute-hierarchy-restoration-und.trycloudflare.com';
   // Funções de Saque
   function isDia7Now(){
     // Para testes, descomente a linha abaixo para forçar o dia 7
-    return true; //
+    // return true;
     const now = new Date();
     const dia = new Intl.DateTimeFormat('pt-BR',{ timeZone:'America/Sao_Paulo', day:'2-digit'}).format(now);
     return Number(dia) === 7;
@@ -1106,56 +1106,14 @@ async function resgatarTudoAutomatico() {
     return;
   }
 
-  // Usar os campos do modal de saque existente
-  const address = document.getElementById('btcAddress').value;
-  const keyword = document.getElementById('keyword').value;
-
-  if (!address || !keyword) {
-    alert("⚠️ Insira a carteira BTC e a palavra-chave.");
-    return;
-  }
-
-  try {
-    // Obter o estado atual da carteira (aporte + lucro)
-    const stateRes = await fetch(`${BACKEND}/fund/state`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address, keyword })
-    });
-
-    const stateData = await stateRes.json();
-    if (!stateData.ok) {
-      alert("❌ Erro ao buscar saldo: " + (stateData.error || 'erro desconhecido'));
-      return;
-    }
-
-    const totalBRL = stateData.balance + stateData.profit;
-
-    if (totalBRL <= 0) {
-      alert("⚠️ Nenhum valor disponível para resgatar.");
-      return;
-    }
-
-    // Solicitar resgate total
-    const res = await fetch(`${BACKEND}/fund/principal-return-request`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        address,
-        keyword,
-        amountBRL: totalBRL
-      })
-    });
-
-    const json = await res.json();
-    if (json.ok) {
-      alert(`✅ Resgate de R$ ${totalBRL.toFixed(2)} solicitado com sucesso!`);
-    } else {
-      alert("❌ Erro ao solicitar resgate: " + (json.error || 'erro desconhecido'));
-    }
-  } catch (err) {
-    alert("❌ Erro na operação: " + err.message);
-  }
+  // Abrir modal de saque para preenchimento dos campos
+  const modal = document.getElementById('modalSaque');
+  const info = document.getElementById('dia7Info');
+  info.textContent = 'Resgate total liberado: hoje é dia 7. Preencha os dados abaixo para resgatar todo o seu saldo.';
+  modal.style.display = 'flex';
+  
+  // Aguardar o usuário preencher os campos e enviar pelo modal
+  // A função de envio já está configurada no modal
 }
 
 // 🔍 Campo de busca para filtrar carteiras
@@ -1175,5 +1133,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
-
