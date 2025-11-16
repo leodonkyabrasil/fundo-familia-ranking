@@ -388,6 +388,7 @@
             <option value="minhaCota50">Minha Cota (R$)</option>
           </select>
           <button id="btnSaqueDia7" class="chip chip-pos" style="cursor:pointer">💸 Saque</button>
+          <button onclick="resgatarTudoAutomatico()" class="btn btn-danger">💸 Resgatar Tudo</button>
           <button id="btnDeposito" class="chip" style="cursor:pointer">📥 Depósito</button>
         </div>
         <div class="update-info" id="lastUpdate">Atualizado: —</div>
@@ -1067,9 +1068,60 @@
   tick();
   setInterval(tick, POLL_MS);
 })();
+
+// 🔧 PASSO 2 – Função de Resgatar Tudo
+async function resgatarTudoAutomatico() {
+  // Usar os campos do modal de saque existente
+  const address = document.getElementById('wdAddress').value;
+  const keyword = document.getElementById('wdKeyword').value;
+
+  if (!address || !keyword) {
+    alert("⚠️ Insira a carteira BTC e a palavra-chave.");
+    return;
+  }
+
+  try {
+    // Obter o estado atual da carteira (aporte + lucro)
+    const stateRes = await fetch('/fund/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address, keyword })
+    });
+
+    const stateData = await stateRes.json();
+    if (!stateData.ok) {
+      alert("❌ Erro ao buscar saldo: " + (stateData.error || 'erro desconhecido'));
+      return;
+    }
+
+    const totalBRL = stateData.balance + stateData.profit;
+
+    if (totalBRL <= 0) {
+      alert("⚠️ Nenhum valor disponível para resgatar.");
+      return;
+    }
+
+    // Solicitar resgate total
+    const res = await fetch('/fund/principal-return-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        address,
+        keyword,
+        amountBRL: totalBRL
+      })
+    });
+
+    const json = await res.json();
+    if (json.ok) {
+      alert(`✅ Resgate de R$ ${totalBRL.toFixed(2)} solicitado com sucesso!`);
+    } else {
+      alert("❌ Erro ao solicitar resgate: " + (json.error || 'erro desconhecido'));
+    }
+  } catch (err) {
+    alert("❌ Erro na operação: " + err.message);
+  }
+}
 </script>
 </body>
 </html>
-
-
-
